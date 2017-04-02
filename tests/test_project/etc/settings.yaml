@@ -1,0 +1,85 @@
+
+app_name: 'server1'
+project_name: 'carrier'
+project_version: '0.1'
+
+logging:
+  level: DEBUG
+  format: '%(project_name)s:%(project_version)s %(app_id)s %(levelname)s %(asctime)s %(_filename)s:%(_lineno)d [%(tags)s] %(message)s'
+  handlers:
+    - type: file
+      enable: true
+      filename: 'server.log'
+      encoding: 'UTF-8'
+      max_bytes: 67108864 # 64MB
+      backup_count: 10
+
+    - type: file
+      enable: true
+      filename: 'trans.log'   #运单日志跟踪
+      encoding: 'UTF-8'
+      max_bytes: 67108864 # 64MB
+      backup_count: 10
+      filter: 'trans'
+
+    - type: logtail
+      enable: false
+      logstore: 'abc'
+      access_token: 'xxxx'
+      scret_key: 'xxxx'
+      uri: 'xxxx'
+
+    - type: console
+      enable: false
+
+celery_config:
+  default:
+    BROKER_URL : 'redis://:111111@%127.0.0.1:6379/6'       #request queue
+    CELERY_RESULT_BACKEND : 'redis://:111111@%127.0.0.1:6379/7'  #result queue
+
+databases:
+
+http:
+  host : '127.0.0.1'
+  port : 5555
+  threaded: false
+  debug: true
+
+caches:
+  default:
+    type: redis
+    host: '127.0.0.1'
+    port: 5603
+    password: '1111'
+    enable: true
+
+flask_config:
+  active: default
+  default:
+    REDIS_URL : "redis://:@localhost:6379/1"
+    SQLALCHEMY_DATABASE_URI : 'mysql://root:root123@127.0.0.1:3306/carrier?charset=utf8'
+    SQLALCHEMY_TRACK_MODIFICATIONS : true
+    SQLALCHEMY_COMMIT_ON_TEARDOWN : true
+    SECRET_KEY : "abc"
+    TOKEN_EXPIRE : 3600*2
+    MAX_CONTENT_LENGTH : 5242880
+    UPLOAD_FOLDER : 'upload/'
+    FRONT_URL :  'tender_manage/'
+#       ALLOWED_EXTENSIONS : set(['png', 'jpg', 'jpeg', 'gif', 'bmp', 'pdf'])
+    M_HOST : 'smtp.163.com:465'
+    M_SENDER : 'mynamegyz@163.com'
+    M_PWD : 'gyz111111a'
+    ADMINS :
+      - 'mynamegyz@163.com'
+    DEBUG_TB_PROFILER_ENABLED : true
+    DEBUG : true
+
+
+
+  devel:
+
+
+
+
+
+
