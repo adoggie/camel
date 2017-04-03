@@ -13,15 +13,32 @@ class Singleton(object):
             cls.handle = cls()
         return cls.handle
 
-class Instance:
+class ObjectCreateHelper(object):
+    def __init__(self,func,*args,**kwargs):
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+    def create(self):
+        return self.func(*self.args,**self.kwargs)
+
+class Instance(object):
     def __init__(self):
         self.handle = None
+        self.helper = None
 
     def set(self,handle):
         self.handle = handle
 
     def __getattr__(self, item):
-        return getattr(self.handle,item)
+        return getattr(self.handle, item)
+
+        # if self.handle:
+        #     return getattr(self.handle,item)
+        # if  self.helper:
+        #     v = self.helper.create()
+        #     return v
+
 
     def get(self):
         return self.handle

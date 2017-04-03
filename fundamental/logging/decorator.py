@@ -17,3 +17,6 @@ def log_func(instance):
             return fx(*args,**kwargs)
         return _wrapped
     return _log_func
+
+def auto_trace():
+    pass

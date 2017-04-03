@@ -1,2 +1,2 @@
 
-from app import Application,instance
+from app import Application,instance,Instance

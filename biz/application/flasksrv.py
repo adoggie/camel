@@ -1,50 +1,60 @@
 #coding:utf-8
 
-from flask import Flask,g
+from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 
-from camel.fundamental.utils.useful import Instance
+from camel.fundamental.utils.importutils import *
+from camel.fundamental.utils.useful import Instance,ObjectCreateHelper
 from camel.fundamental.application import Application,instance
-from camel.biz.logging.filter import LogHandlerFilterMixer
-from camel.biz.logging.handler import LogHandlerMixer
+from camelsrv import CamelService
 
 db = Instance()
+# er = Obj# db.helpectCreateHelper(lambda :SQLAlchemy())
 
-class FlaskService(LogHandlerFilterMixer,LogHandlerMixer,Application):
+# class FlaskService(LogHandlerFilterMixer,LogHandlerMixer,Application):
+class FlaskService( CamelService):
     def __init__(self,*args,**kwargs):
         self.app = None     # flask app
-        Application.__init__(self,*args,**kwargs)
-        self.init()
+        CamelService.__init__(self,*args,**kwargs)
 
     def getDatabase(self):
         return self.db
+
+    def getFlaskConfig(self):
+        cfg = self.getConfig().get('flask_config')
+        return cfg.get( cfg.get('active') )
 
     def init(self):
         Application.init(self)
         self._initFlaskApp()
 
     def _initDatabase(self):
-        global db
-        if not self.db:
-            self.db = SQLAlchemy()
-            db.handle = self.db
+        pass
+
+    def getFlaskApp(self):
+        return self.app
 
     def _initFlaskApp(self):
         self.app = Flask(__name__)
         self._initFlaskConfig()
-        self.getDatabase().init_app(self.app)
+
+        global db
+        if db.get() is None:
+            self.db = SQLAlchemy(self.app)
+            db.handle = self.db
+        # else: # db 先被创建，然后绑定Flask app
+            # db.handle.init_app( self.app )
+            # db.handle.app = self.app
+
         self._initBlueprint()
-        # g.instance = self
+
+    # def _recursive_import(self,path):
 
     def _initBlueprint(self):
-        # if hasattr(self,'blueprint'):
-        #     blueprints = self.blueprint
-        #     for bp in blueprints:
-        #         self.registerBlueprint( bp[0], bp[1] )
-        # import urlparse
 
         rts = self.getRouteConfig()
         for rt in rts:
+            rt = import_module( rt )
             url = rt.__url__
             appname = rt.__app__
 
@@ -67,10 +77,11 @@ class FlaskService(LogHandlerFilterMixer,LogHandlerMixer,Application):
 
     def _initFlaskConfig(self):
         """初始化激活的配置"""
-        cfg = self.getConfig().get('flask_config')
-        active = cfg.get('active')
-        cfg_active = cfg.get(active)
-        self.app.config.from_object( cfg_active)
+
+        active = self.getFlaskConfig()
+        # self.app.config.from_object( cfg_active)
+        for k,v in active.items():
+            self.app.config[k] = v
 
     def _initLogger(self):
         from camel.biz.logging.logger import FlaskHttpRequestLogger
@@ -91,4 +102,7 @@ class FlaskService(LogHandlerFilterMixer,LogHandlerMixer,Application):
 def setup(cls = FlaskService):
     return cls.instance()
 
-__all__=(db,FlaskService,instance)
+
+
+
+__all__=(db,FlaskService,instance,setup)

@@ -5,7 +5,8 @@ __date__ = "2016-01-29"
 import sys
 import hashlib
 import datetime
-from instance.camel_app import db
+
+from camel.biz.application.flasksrv import db
 
 class Fence(db.Model):
     __tablename__ = "Fence"

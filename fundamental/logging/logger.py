@@ -15,6 +15,8 @@ class Logger:
         self.name = name
         self.logger = logging.getLogger(name)
         self.fmt_extra = {}
+        self.fmt = ''
+        self.message_fmt = '' # '%(project_name)s:%(project_version)s %(app_id)s %(_filename)s:%(_lineno)d [%(tags)s] %(message)s'
         self.tags = []
         self.level = logging.INFO
 
@@ -39,8 +41,15 @@ class Logger:
     TEMPLATE_FORMAT = '[%(project_name)s:%(project_version)s %(app_id)s] %(levelname)s %(asctime)s %(filename)s:%(lineno)d [%(tags)s] %(message)s'
 
     def setFormat(self,fmt = TEMPLATE_FORMAT):
+        # from logging import config
+
         logging.basicConfig(format= fmt )
+        # logging.basicConfig()
+        self.fmt = fmt
         return self
+
+    def setMessageFormat(self,fmt):
+        self.message_fmt = fmt
 
     def setFormatExtra(self,extra):
         self.fmt_extra = extra
@@ -105,6 +114,19 @@ class Logger:
         """
         extra = self.fmt_extra.copy()
 
+        # if False:
+        #     if kwargs.has_key('tags'):
+        #         extra['tags'] = self._normalize_tags( kwargs['tags'])
+        #     else:
+        #         extra['tags'] = self._normalize_tags('')
+        #
+        #     filename,lineno = __FILE__()
+        #
+        #     extra['_filename'] = os.path.basename(filename)
+        #     extra['_lineno'] = lineno
+        #     self.logger.log( level , *args,extra = extra )
+
+
         if kwargs.has_key('tags'):
             extra['tags'] = self._normalize_tags( kwargs['tags'])
         else:
@@ -114,7 +136,9 @@ class Logger:
 
         extra['_filename'] = os.path.basename(filename)
         extra['_lineno'] = lineno
-        self.logger.log( level , *args,extra = extra )
+        message = self.message_fmt%extra
+
+        self.logger.log( level ,  message + args[0]%args[1:] )
 
 
     def debug(self,*args,**kwargs):

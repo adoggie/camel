@@ -5,7 +5,14 @@ project_version: '0.1'
 
 logging:
   level: DEBUG
-  format: '%(project_name)s:%(project_version)s %(app_id)s %(levelname)s %(asctime)s %(_filename)s:%(_lineno)d [%(tags)s] %(message)s'
+#  format: '%(project_name)s:%(project_version)s %(app_id)s %(levelname)s %(asctime)s %(_filename)s:%(_lineno)d [%(tags)s] %(message)s'
+  format: '%(levelname)s %(asctime)s  %(message)s'
+  message_format: '%(project_name)s:%(project_version)s %(app_id)s %(_filename)s:%(_lineno)d [%(tags)s] '
+
+  filters:
+    trans:
+      tag: 'TRANS:'   # tag 过滤
+      text: ''        # 文本消息过滤
   handlers:
     - type: file
       enable: true
@@ -32,6 +39,12 @@ logging:
     - type: console
       enable: false
 
+  auto_trace: #自动日志记录
+    http_request: true
+    http_parameter: true
+    http_client:  true
+
+
 celery_config:
   default:
     BROKER_URL : 'redis://:111111@%127.0.0.1:6379/6'       #request queue
@@ -53,11 +66,17 @@ caches:
     password: '1111'
     enable: true
 
+#mysql://username:password@hostname/database
+#sqlite:////absolute/path/to/database
+#postgresql://username:password@hostname/database
+
 flask_config:
   active: default
   default:
     REDIS_URL : "redis://:@localhost:6379/1"
-    SQLALCHEMY_DATABASE_URI : 'mysql://root:root123@127.0.0.1:3306/carrier?charset=utf8'
+#    SQLALCHEMY_DATABASE_URI : 'mysql://root:root123@127.0.0.1:3306/carrier?charset=utf8'
+    SQLALCHEMY_DATABASE_URI : 'sqlite:////tmp/test.db'
+#    SQLALCHEMY_DATABASE_URI : 'sqlite:////tmp/test.db'
     SQLALCHEMY_TRACK_MODIFICATIONS : true
     SQLALCHEMY_COMMIT_ON_TEARDOWN : true
     SECRET_KEY : "abc"

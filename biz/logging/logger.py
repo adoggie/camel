@@ -3,23 +3,14 @@
 from camel.fundamental.logging.logger import Logger
 
 
-class CamelLogger(Logger):
-    def __init__(self,*args,**kwargs):
-        Logger.__init__(self,*args,**kwargs)
-
-    def setTransportTag(self,no):
-        #设置运单
-        from filter import TransportInvoiceFilter
-        self.addTag( '%s:%s'%(TransportInvoiceFilter.TAG,no) )
-
-class FlaskHttpRequestLogger(CamelLogger):
+class FlaskHttpRequestLogger(Logger):
     """将日志中的Tags项关联到 flask的request对象中
     """
     def __init__(self,*args,**kwargs):
-        CamelLogger.__init__(self,*args,**kwargs)
+        Logger.__init__(self,*args,**kwargs)
 
     def setTags(self,tags):
-        from flask import request
+        from flask import request,g
         if type(tags) == str:
             ss = tags.strip()
             if ss:
@@ -27,13 +18,13 @@ class FlaskHttpRequestLogger(CamelLogger):
             else:
                 tags = []
         # if type(tags) in (tuple,list):
-        request.log_tags = tags
+        g.log_tags = tags
         return self
 
     def getTags(self):
         from flask import request,g
-        if not hasattr(request,'log_tags'):
-            request.log_tags = []
-        return request.log_tags
+        if not hasattr(g,'log_tags'):
+            g.log_tags = []
+        return g.log_tags
 
 

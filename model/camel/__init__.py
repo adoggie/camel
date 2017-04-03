@@ -1,4 +1,4 @@
-__author__ = "Bo"
-__date__ = "$2016-02-01$"
+# from model import *
 
-from model import *
+# from address import Address
+from fence import Fence

@@ -18,10 +18,10 @@ class LogtailHander(LogHandlerBase,Handler):
     def close(self):
         pass
 
-
-
-class LogHandlerMixer(object):
-    def _initLogHandler(self, cfg):
-        #新的handler添加请放在此处初始化
-        from camel.fundamental.application import Application
-        return Application._initLogHandler(self, cfg)
+#
+#
+# class LogHandlerMixer(object):
+#     def _initLogHandler(self, cfg):
+#         #新的handler添加请放在此处初始化
+#         from camel.fundamental.application import Application
+#         return Application._initLogHandler(self, cfg)

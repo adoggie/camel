@@ -10,7 +10,7 @@ from camel.fundamental.utils.useful import Instance,Singleton
 from camel.fundamental.basetype import CAMEL_HOME
 from camel.fundamental.logging.logger import Logger
 from camel.fundamental.parser.yamlparser import YamlConfigParser
-
+from camel.fundamental.logging.filter import LogHandlerFilter
 
 instance = Instance()
 
@@ -22,6 +22,8 @@ class Application(Singleton,object):
         self.caches = None
         self.logger = Logger(__name__)
         self.db = None
+        self.config_file ='settings.yaml'
+        self.log_filters = {}
 
 
         global instance
@@ -34,7 +36,7 @@ class Application(Singleton,object):
         return self.name
 
     def getDefaultConfigFile(self):
-        return os.path.join(self.getConfigPath(),'settings.yaml')
+        return os.path.join(self.getConfigPath(),self.config_file )
 
     def getHomePath(self):
         # path = os.path.join(self.getCamelHomePath(), 'products', self.name)
@@ -81,13 +83,16 @@ class Application(Singleton,object):
         if self.name:
             return
         self.name = os.getenv('APP_NAME')
-        options, args = getopt.getopt(sys.argv[1:], 'hn:', ['help', 'name=']) # : 带参数
+        options, args = getopt.getopt(sys.argv[1:], 'hc:n:', ['help', 'name=','config=']) # : 带参数
         for name, value in options:
             if name in ['-h', "--help"]:
                 self.usage()
                 sys.exit()
             if name in ('-n', '--name'):
                 self.name = value
+            if name in ('-c','--config'):
+                self.config_file = name
+
         if not self.name:
             self.name = ''
 
@@ -99,6 +104,8 @@ class Application(Singleton,object):
         mkpath(self.getRunPath())
 
     def init(self):
+        self._init_before()
+
         self._initOptions()
         self._initDirectories()
         self._initConfig()
@@ -107,6 +114,14 @@ class Application(Singleton,object):
         self._initRPC()
         self._initNoSQL()
         self._initCache()
+
+        self._init_after()
+
+    def _init_before(self):
+        pass
+
+    def _init_after(self):
+        pass
 
     def _initConfig(self):
         yaml = self.getDefaultConfigFile()
@@ -141,20 +156,37 @@ class Application(Singleton,object):
         extra = {'project_name':project,'project_version':ver,'app_id':app_id,'tags':''}
         formatter = logging.Formatter(log.get('format'))
         self.logger.setFormat(log.get('format')).setFormatExtra(extra)
+
+        self.logger.setMessageFormat(log.get('message_format'))
+
+        self._initLogHandlerFilters(log.get('filters',{}))
+
         handlers = log.get('handlers',[])
         for cfg in handlers:
             handler = self._initLogHandler(cfg)
             if handler:
-                self.logger.addHandler(handler)
                 handler.setFormatter(formatter)
+                self.logger.addHandler(handler)
+
 
                 ss = cfg.get('filter', '').strip()
                 if ss:
-                    names = map( string.strip ,ss.split(',') )
-                    self._initLogHandlerFilters(handler,names)
+                    ss = map( string.strip ,ss.split(',') )
 
-    def _initLogHandlerFilters(self,handler,names):
-        pass
+                    for s in ss:
+                        flt = self.log_filters.get(s)
+                        if flt:
+                            handler.addFilter(flt)
+                        else:
+                            print 'error: filter<%s> not found!'%s
+
+
+    def _initLogHandlerFilters(self,cfgs):
+        filters = {}
+        for name,cfg in cfgs.items():
+            flt = LogHandlerFilter(name,cfg)
+            filters[name] = flt
+        self.log_filters = filters
 
     def _initLogHandler(self,cfg):
         """日志handler初始化
