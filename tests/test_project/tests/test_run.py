@@ -11,9 +11,9 @@ class TestApp(unittest.TestCase):
         pass
 
     def test_service(self):
-        from camel.biz.application.camelsrv import CamelService
+        from camel.biz.application.camelsrv import CamelApplication
 
-        app = CamelService.instance()
+        app = CamelApplication.instance()
 
         # app.getLogger().addTag('CS')
         # app.getLogger().debug('first line', tags='HOP,TRANS:A00912')
@@ -26,8 +26,8 @@ class TestApp(unittest.TestCase):
         # app.getLogger().debug('request in ')
 
     def test_flaskservice(self):
-        from camel.biz.application.flasksrv import FlaskService
-        app = FlaskService.instance()
+        from camel.biz.application.flasksrv import FlaskApplication
+        app = FlaskApplication.instance()
 
         app.getLogger().addTag('CS')
         app.getLogger().debug('first line', tags='HOP,TRANS:A00912')

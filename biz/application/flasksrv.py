@@ -1,21 +1,20 @@
 #coding:utf-8
 
-from flask import Flask
+from flask import Flask,request,g
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from camel.fundamental.utils.importutils import *
-from camel.fundamental.utils.useful import Instance,ObjectCreateHelper
+# from camel.fundamental.utils.useful import Instance,ObjectCreateHelper
 from camel.fundamental.application import Application,instance
-from camelsrv import CamelService
+from camelsrv import CamelApplication,db
 
-db = Instance()
+# db = Instance()
 # er = Obj# db.helpectCreateHelper(lambda :SQLAlchemy())
 
-# class FlaskService(LogHandlerFilterMixer,LogHandlerMixer,Application):
-class FlaskService( CamelService):
+class FlaskApplication( CamelApplication):
     def __init__(self,*args,**kwargs):
         self.app = None     # flask app
-        CamelService.__init__(self,*args,**kwargs)
+        CamelApplication.__init__(self,*args,**kwargs)
 
     def getDatabase(self):
         return self.db
@@ -38,17 +37,97 @@ class FlaskService( CamelService):
         self.app = Flask(__name__)
         self._initFlaskConfig()
 
-        global db
+        # global db
         if db.get() is None:
             self.db = SQLAlchemy(self.app)
             db.handle = self.db
-        # else: # db 先被创建，然后绑定Flask app
-            # db.handle.init_app( self.app )
-            # db.handle.app = self.app
 
+        self._initRequestHooks()
         self._initBlueprint()
 
-    # def _recursive_import(self,path):
+
+    def _initRequestHooks(self):
+        self.app.before_request(self._requestBefore)
+
+        self.app.teardown_request(self._requestTeardown)
+        self.app.after_request(self._requestAfter)
+
+    def _traceRequestInfo(self,opts):
+        import json
+        trace_data = {'url':request.url}
+        if opts.get('header'):
+            trace_data['headers'] = request.headers
+        if opts.get('body'):
+            trace_data['body'] = request.data.replace('\n',' ')[:opts.get('max_size')]
+        return json.dumps( trace_data)
+
+    def _traceResponseInfo(self,opts,response):
+        import json
+        trace_data = {'url':request.url}
+        if opts.get('header'):
+            trace_data['headers'] = response.headers
+        if opts.get('body'):
+            trace_data['body'] = response.data.replace('\n',' ')[:opts.get('max_size')]
+        return json.dumps( trace_data)
+
+    def _requestBefore(self):
+        import time
+        g.start_time = time.time()
+
+        trace = self.getConfig().get('auto_trace',{}).get('http_request',{})
+        options = trace.get('options',{'header':False,'body':False,'max_size':1024})
+        urls = trace.get('urls',[])
+        #sort urls by 'match' with desceding.
+        urls = sorted(urls,cmp = lambda x,y: cmp(len(x.get('match')) , len(y.get('match')) ) )
+        urls.reverse()
+
+
+        text = ''
+        for url in urls:
+            m = url.get('match')
+            if m:
+                opts = options.copy()
+                opts['header'] = url.get('header',options.get('header'))
+                opts['body'] = url.get('body',options.get('body'))
+                opts['max_size'] = url.get('max_size',options.get('max_size'))
+                if request.url.find(m) !=-1:
+                    text = self._traceRequestInfo(opts)
+                    break
+        level = self.getConfig().get('auto_trace',{}).get('level','DEBUG')
+        text = 'HttpRequest: '+text
+        self.getLogger().log(level,text)
+
+    def _requestTeardown(self,e):
+        pass
+
+    def _requestAfter(self,response):
+        import time
+        elapsed = int( (time.time() - g.start_time)*1000 )
+
+        trace = self.getConfig().get('auto_trace', {}).get('http_response', {})
+        options = trace.get('options', {'header': False, 'body': False, 'max_size': 1024})
+        urls = trace.get('urls', [])
+
+        urls = sorted(urls, cmp=lambda x, y: cmp(len(x.get('match')), len(y.get('match'))))
+        urls.reverse()
+
+        text = ''
+        for url in urls:
+            m = url.get('match')
+            if m:
+                opts = options.copy()
+                opts['header'] = url.get('header', options.get('header'))
+                opts['body'] = url.get('body', options.get('body'))
+                opts['max_size'] = url.get('max_size', options.get('max_size'))
+                if request.url.find(m) != -1:
+                    text = self._traceResponseInfo(opts,response)
+                    break
+        level = self.getConfig().get('auto_trace', {}).get('level', 'DEBUG')
+
+        text = 'HttpResponse (elapsed time:%sms) : '%elapsed + text
+        self.getLogger().log(level, text)
+
+        return response
 
     def _initBlueprint(self):
 
@@ -70,7 +149,7 @@ class FlaskService( CamelService):
                 self.registerBlueprint(bp, url_prefix )
 
     def getRouteConfig(self):
-        return []
+        return self.conf.get('blueprint_routes',[])
 
     def _checkConfig(self):
         pass
@@ -99,10 +178,10 @@ class FlaskService( CamelService):
     def registerBlueprint(self,bp,url):
         self.app.register_blueprint( bp , url_prefix= url )
 
-def setup(cls = FlaskService):
+def setup(cls = FlaskApplication):
     return cls.instance()
 
 
 
 
-__all__=(db,FlaskService,instance,setup)
+__all__=(db,FlaskApplication,instance,setup)

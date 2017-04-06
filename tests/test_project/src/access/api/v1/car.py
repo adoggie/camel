@@ -21,6 +21,8 @@ def do_request():
 
 @app.route('/cat')
 def cat():
+    import time
+    time.sleep(.2)
     instance.getLogger().debug('miao~')
     return 'i am cat!'
 

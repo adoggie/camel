@@ -104,7 +104,7 @@ class Application(Singleton,object):
         mkpath(self.getRunPath())
 
     def init(self):
-        self._init_before()
+        self._initBefore()
 
         self._initOptions()
         self._initDirectories()
@@ -115,12 +115,12 @@ class Application(Singleton,object):
         self._initNoSQL()
         self._initCache()
 
-        self._init_after()
+        self._initAfter()
 
-    def _init_before(self):
+    def _initBefore(self):
         pass
 
-    def _init_after(self):
+    def _initAfter(self):
         pass
 
     def _initConfig(self):
@@ -214,10 +214,14 @@ class Application(Singleton,object):
 
     def _initCache(self):
         from camel.fundamental.cache.manager import CacheManager
-        self.caches = CacheManager().loads(self.getConfig().get('caches'))
+        self.caches = CacheManager().loads(self.getConfig().get('cache_config'))
 
     def _initRPC(self):
         pass
+
+    def getCache(self,*args):
+       self.caches.get(*args)
+
 
     def run(self):
         print 'Service [%s] Started..'%self.name

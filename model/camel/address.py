@@ -4,7 +4,7 @@ __date__ = "2016-01-28"
 
 import datetime
 
-from camel.biz.application.flasksrv import db
+from camel.biz.application.camelsrv import db
 
 class Address(db.Model):
     __tablename__ = 'Address'

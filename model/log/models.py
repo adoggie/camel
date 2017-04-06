@@ -21,7 +21,7 @@ __date__ = "2016-05-10"
 # Imports
 # =======
 
-from camel.biz.application.flasksrv import db
+from camel.biz.application.camelsrv import db
 
 
 # Classes for field storage

@@ -21,17 +21,21 @@ class Logger:
         self.level = logging.INFO
 
     def setLevel(self,level='INFO'):
-        maps = {
-            'DEBUG':logging.DEBUG,
-            'INFO':logging.INFO,
-            'WARNING':logging.WARNING,
-            'ERROR':logging.ERROR,
-            'CRITICAL':logging.CRITICAL
-        }
-        level = string.upper(level)
-        intval = maps.get(level,logging.INFO)
+        intval = Logger.convertLevelToIntValue(level)
         self.logger.setLevel( intval )
         self.level = intval
+
+    @classmethod
+    def convertLevelToIntValue(cls,level):
+        maps = {'DEBUG': logging.DEBUG,
+            'INFO': logging.INFO,
+            'WARNING': logging.WARNING,
+            'WARN': logging.WARNING,
+            'ERROR': logging.ERROR,
+            'CRITICAL': logging.CRITICAL}
+        level = string.upper(level)
+        intval = maps.get(level, logging.INFO)
+        return intval
 
     def addHandler(self,handler):
         self.logger.addHandler(handler)
@@ -112,20 +116,9 @@ class Logger:
                 - string 'HOP,TRANS:A10021'
         :return:
         """
+        if type(level) in (str,unicode):
+            level = Logger.convertLevelToIntValue(level)
         extra = self.fmt_extra.copy()
-
-        # if False:
-        #     if kwargs.has_key('tags'):
-        #         extra['tags'] = self._normalize_tags( kwargs['tags'])
-        #     else:
-        #         extra['tags'] = self._normalize_tags('')
-        #
-        #     filename,lineno = __FILE__()
-        #
-        #     extra['_filename'] = os.path.basename(filename)
-        #     extra['_lineno'] = lineno
-        #     self.logger.log( level , *args,extra = extra )
-
 
         if kwargs.has_key('tags'):
             extra['tags'] = self._normalize_tags( kwargs['tags'])

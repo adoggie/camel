@@ -1,0 +1,26 @@
+DEBUG 2017-04-04 22:44:30,393  carrier:0.1 <APP_NAME> server.py:21 [] HttpRequest: {"url": "http://127.0.0.1:5555/v1/zoo/cat", "body": ""}
+DEBUG 2017-04-04 22:44:30,599  carrier:0.1 <APP_NAME> car.py:26 [] miao~
+DEBUG 2017-04-04 22:44:30,601  carrier:0.1 <APP_NAME> server.py:30 [] HttpResponse (elapsed time:213ms) : {"url": "http://127.0.0.1:5555/v1/zoo/cat", "body": "i am cat!"}
+DEBUG 2017-04-04 22:47:09,079  carrier:0.1 <APP_NAME> server.py:21 [] HttpRequest: {"url": "http://127.0.0.1:5555/v1/zoo/cat", "body": ""}
+DEBUG 2017-04-04 22:47:09,283  carrier:0.1 <APP_NAME> car.py:26 [] miao~
+DEBUG 2017-04-04 22:47:09,285  carrier:0.1 <APP_NAME> server.py:30 [] HttpResponse (elapsed time:210ms) : {"url": "http://127.0.0.1:5555/v1/zoo/cat", "body": "i am cat!"}
+DEBUG 2017-04-04 22:47:50,291  carrier:0.1 <APP_NAME> server.py:21 [] HttpRequest: {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": ""}
+DEBUG 2017-04-04 22:47:50,291  carrier:0.1 <APP_NAME> car.py:12 [] abccc
+DEBUG 2017-04-04 22:47:50,292  carrier:0.1 <APP_NAME> car.py:19 [TRANS:A001] xxx
+DEBUG 2017-04-04 22:47:50,293  carrier:0.1 <APP_NAME> server.py:30 [TRANS:A001] HttpResponse (elapsed time:3ms) : {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": "i am car!"}
+DEBUG 2017-04-04 23:04:41,500  carrier:0.1 <APP_NAME> server.py:21 [] HttpRequest: {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": ""}
+DEBUG 2017-04-04 23:04:41,501  carrier:0.1 <APP_NAME> car.py:12 [] abccc
+DEBUG 2017-04-04 23:04:41,502  carrier:0.1 <APP_NAME> car.py:19 [TRANS:A001] xxx
+DEBUG 2017-04-04 23:04:41,504  carrier:0.1 <APP_NAME> server.py:30 [TRANS:A001] HttpResponse (elapsed time:9ms) : {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": "i am car!"}
+DEBUG 2017-04-05 10:09:54,671  carrier:0.1 <APP_NAME> server.py:21 [] HttpRequest: {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": ""}
+DEBUG 2017-04-05 10:09:54,672  carrier:0.1 <APP_NAME> car.py:12 [] abccc
+DEBUG 2017-04-05 10:09:54,673  carrier:0.1 <APP_NAME> car.py:19 [TRANS:A001] xxx
+DEBUG 2017-04-05 10:09:54,674  carrier:0.1 <APP_NAME> server.py:30 [TRANS:A001] HttpResponse (elapsed time:9ms) : {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": "i am car!"}
+DEBUG 2017-04-05 10:14:29,506  carrier:0.1 <APP_NAME> server.py:21 [] HttpRequest: {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": ""}
+DEBUG 2017-04-05 10:14:29,507  carrier:0.1 <APP_NAME> car.py:12 [] abccc
+DEBUG 2017-04-05 10:14:29,508  carrier:0.1 <APP_NAME> car.py:19 [TRANS:A001] xxx
+DEBUG 2017-04-05 10:14:29,511  carrier:0.1 <APP_NAME> server.py:30 [TRANS:A001] HttpResponse (elapsed time:11ms) : {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": "i am car!"}
+DEBUG 2017-04-06 20:56:29,603  carrier:0.1 <APP_NAME> server.py:21 [] HttpRequest: {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": ""}
+DEBUG 2017-04-06 20:56:29,605  carrier:0.1 <APP_NAME> car.py:12 [] abccc
+DEBUG 2017-04-06 20:56:29,606  carrier:0.1 <APP_NAME> car.py:19 [TRANS:A001] xxx
+DEBUG 2017-04-06 20:56:29,609  carrier:0.1 <APP_NAME> server.py:30 [TRANS:A001] HttpResponse (elapsed time:47ms) : {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": "i am car!"}

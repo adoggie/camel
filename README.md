@@ -19,7 +19,11 @@
  程序启动时在$CAMEL_HOME中自动创建目录: run, data, etc, logs 
 
 ####2.删除环境变量 APP_NAME 设置
+####3.设置环境变量 CAMEL_LIB 
     
+    export CAMEL_LIB=/Users/scott/Desktop/yto/svn/dev_package/python
+
+####3.运行 run/start-server-dev.sh
 
 ##发布和开发配置区别
 

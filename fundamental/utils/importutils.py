@@ -21,13 +21,20 @@ import sys
 import traceback
 
 
-def import_module(import_str):
+def __import_module(import_str):
     ss = import_str.strip().split('.')
     m = __import__( ss[0])
     del ss[0]
     for s in ss:
         m = getattr(m,s)
     return m
+
+
+def import_module(import_str):
+    import importlib
+    m = importlib.import_module(import_str)
+    return m
+
 
 def import_class(import_str):
     """Returns a class from a string including module and class.

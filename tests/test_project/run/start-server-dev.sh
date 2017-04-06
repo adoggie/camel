@@ -5,9 +5,9 @@
 export LC_ALL=en_US.UTF-8
 pwd=$(cd `dirname $0`;pwd)
 
-
-CAMEL_LIB=/Users/scott/Desktop/yto/svn/dev_package/python
-
+if [ -z $CAMEL_LIB ]; then
+	export CAMEL_LIB=/Users/scott/Desktop/yto/svn/dev_package/python
+fi
 
 if [ -z $CAMEL_HOME ]; then
 	export CAMEL_HOME=$pwd/../

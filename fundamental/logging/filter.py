@@ -10,12 +10,13 @@ class LogHandlerFilter(Filter):
         self.cfg = cfg
 
     def filter(self,record):
-        text = self.cfg.get('text','')
+        # text = self.cfg.get('text','')
         tag = self.cfg.get('tag','')
         NO = 0
         YES = 1
         # if record.message.find(text)!=-1 or record.tags.find(tag) != -1:
-        if record.msg.find(text)!=-1 or record.msg.find(tag) != -1:
+        # if record.msg.find(text)!=-1 or record.msg.find(tag) != -1:
+        if tag and record.msg.find(tag) != -1:
             return YES
         return NO
 
