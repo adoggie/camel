@@ -1,17 +1,4 @@
-# Copyright 2011 OpenStack Foundation.
-# All Rights Reserved.
-#
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
-#    not use this file except in compliance with the License. You may obtain
-#    a copy of the License at
-#
-#         http://www.apache.org/licenses/LICENSE-2.0
-#
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#    License for the specific language governing permissions and limitations
-#    under the License.
+#coding:utf-8
 
 """
 Import related utilities and helper functions.
@@ -19,7 +6,6 @@ Import related utilities and helper functions.
 
 import sys
 import traceback
-
 
 def __import_module(import_str):
     ss = import_str.strip().split('.')
@@ -29,11 +15,23 @@ def __import_module(import_str):
         m = getattr(m,s)
     return m
 
-
 def import_module(import_str):
     import importlib
     m = importlib.import_module(import_str)
     return m
+
+
+def import_function(import_str):
+    """导入模块中的函数  a.b.c.fx """
+    import string
+    ss = import_str.strip().split('.')
+    func_name = ss[-1]
+    import_str = string.join(ss[:-1],'.')
+    module = import_module( import_str)
+    func = None
+    if hasattr( module,func_name):
+        func = getattr( module,func_name)
+    return func
 
 
 def import_class(import_str):

@@ -8,9 +8,9 @@ def singleton(cls):
 
 class Singleton(object):
     @classmethod
-    def instance(cls):
+    def instance(cls,*args,**kwargs):
         if not hasattr(cls,'handle'):
-            cls.handle = cls()
+            cls.handle = cls(*args,**kwargs)
         return cls.handle
 
 class ObjectCreateHelper(object):
@@ -52,3 +52,16 @@ def hash_object(obj):
         if not callable(attr):
             kvs[k] = attr
     return kvs
+
+def get_config_item(root,path,default=None):
+    """根据配置路径 x.y.z ,获取配置项"""
+    ss = path.split('.')
+    conf = root
+    try:
+        for s in ss:
+            conf = conf.get(s)
+            if not conf:
+                break
+    except:
+        conf = default
+    return conf

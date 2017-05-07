@@ -7,6 +7,8 @@ class ValueEntry:
         self.value = value
         self.comment = comment
 
+    def __get__(self, instance, owner):
+        return self.value
 
 
 CAMEL_HOME='/srv/camel'

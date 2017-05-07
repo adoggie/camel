@@ -3,48 +3,20 @@
 from flask import Flask,request,g
 from flask.ext.sqlalchemy import SQLAlchemy
 
+
 from camel.fundamental.utils.importutils import *
-# from camel.fundamental.utils.useful import Instance,ObjectCreateHelper
 from camel.fundamental.application import Application,instance
 from camelsrv import CamelApplication,db
 
-# db = Instance()
-# er = Obj# db.helpectCreateHelper(lambda :SQLAlchemy())
 
 class FlaskApplication( CamelApplication):
     def __init__(self,*args,**kwargs):
-        self.app = None     # flask app
         CamelApplication.__init__(self,*args,**kwargs)
 
-    def getDatabase(self):
-        return self.db
-
-    def getFlaskConfig(self):
-        cfg = self.getConfig().get('flask_config')
-        return cfg.get( cfg.get('active') )
-
-    def init(self):
-        Application.init(self)
-        self._initFlaskApp()
-
-    def _initDatabase(self):
-        pass
-
-    def getFlaskApp(self):
-        return self.app
-
     def _initFlaskApp(self):
-        self.app = Flask(__name__)
-        self._initFlaskConfig()
-
-        # global db
-        if db.get() is None:
-            self.db = SQLAlchemy(self.app)
-            db.handle = self.db
-
+        CamelApplication._initFlaskApp(self)
         self._initRequestHooks()
         self._initBlueprint()
-
 
     def _initRequestHooks(self):
         self.app.before_request(self._requestBefore)
@@ -74,7 +46,7 @@ class FlaskApplication( CamelApplication):
         import time
         g.start_time = time.time()
 
-        trace = self.getConfig().get('auto_trace',{}).get('http_request',{})
+        trace = self.getConfig().get('http_trace',{}).get('request',{})
         options = trace.get('options',{'header':False,'body':False,'max_size':1024})
         urls = trace.get('urls',[])
         #sort urls by 'match' with desceding.
@@ -93,7 +65,7 @@ class FlaskApplication( CamelApplication):
                 if request.url.find(m) !=-1:
                     text = self._traceRequestInfo(opts)
                     break
-        level = self.getConfig().get('auto_trace',{}).get('level','DEBUG')
+        level = self.getConfig().get('http_trace',{}).get('level','DEBUG')
         text = 'HttpRequest: '+text
         self.getLogger().log(level,text)
 
@@ -104,7 +76,7 @@ class FlaskApplication( CamelApplication):
         import time
         elapsed = int( (time.time() - g.start_time)*1000 )
 
-        trace = self.getConfig().get('auto_trace', {}).get('http_response', {})
+        trace = self.getConfig().get('http_trace', {}).get('response', {})
         options = trace.get('options', {'header': False, 'body': False, 'max_size': 1024})
         urls = trace.get('urls', [])
 
@@ -122,7 +94,7 @@ class FlaskApplication( CamelApplication):
                 if request.url.find(m) != -1:
                     text = self._traceResponseInfo(opts,response)
                     break
-        level = self.getConfig().get('auto_trace', {}).get('level', 'DEBUG')
+        level = self.getConfig().get('http_trace', {}).get('level', 'DEBUG')
 
         text = 'HttpResponse (elapsed time:%sms) : '%elapsed + text
         self.getLogger().log(level, text)
@@ -130,37 +102,50 @@ class FlaskApplication( CamelApplication):
         return response
 
     def _initBlueprint(self):
+        from flask import Blueprint
 
-        rts = self.getRouteConfig()
-        for rt in rts:
-            rt = import_module( rt )
-            url = rt.__url__
-            appname = rt.__app__
+        self.blueprints = {}
 
-            attrs = [s for s in dir(rt) if not s.startswith('__') ]
-            for name in attrs:
-                module = getattr(rt,name)
-                bp = getattr(module,appname)
-                splitchr = '/'
-                if url[-1] =='/':
-                    splitchr =''
-                url_prefix = url+ splitchr  +bp.name
-                print '>> init blueprint:',bp.name,' url_prefix:',url_prefix
-                self.registerBlueprint(bp, url_prefix )
+        cfgs = self.getConfig().get('blueprint_routes',[])
+        for cfg in cfgs:
+            # module = import_module( cfgs.get('module'))
+            package = cfg.get('package')
+            package_url = cfg.get('url')
+            modules = cfg.get('modules',[])
+            for module in modules:
+                module_name = module.get('name',)
+                module_url = module.get("url",'')
+                path = '%s.%s'%(package,module_name)
+                load_module = import_module(path)
+
+                app = Blueprint(module_name,path)
+                self.blueprints[path] = app
+
+                routes = module.get('routes',[])
+                for route in routes:
+                    url = route.get('url','')
+                    name = route.get('name','')
+                    methods = filter(lambda x:len(x)>0,route.get('methods','').strip().upper().split(','))
+
+                    if hasattr( load_module,name):
+                        func = getattr( load_module,name)
+                        path = package_url+module_url
+                        path  = path.replace('//','/')
+                        if methods:
+                            app.route(url,methods=methods)(func)
+                        else:
+                            app.route(url)(func)
+                        self.registerBlueprint(app,path)
+                        path = path + '/' + url
+                        path = path.replace('//','/')
+                        print 'registered blueprint route:', path
+
 
     def getRouteConfig(self):
-        return self.conf.get('blueprint_routes',[])
+        return self.conf.get('blueprint_routes')
 
     def _checkConfig(self):
         pass
-
-    def _initFlaskConfig(self):
-        """初始化激活的配置"""
-
-        active = self.getFlaskConfig()
-        # self.app.config.from_object( cfg_active)
-        for k,v in active.items():
-            self.app.config[k] = v
 
     def _initLogger(self):
         from camel.biz.logging.logger import FlaskHttpRequestLogger

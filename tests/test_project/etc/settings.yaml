@@ -37,9 +37,9 @@ logging:
     - type: console
       enable: false
 
-auto_trace: #自动日志记录
+http_trace: #自动日志记录
   level: DEBUG
-  http_request:
+  request:
     options:
       header:  false
       body:  true
@@ -49,7 +49,7 @@ auto_trace: #自动日志记录
       - match: 'zoo/cat'
         body:  true
 
-  http_response:
+  response:
     options:
       header:  false
       body:  true
@@ -58,6 +58,12 @@ auto_trace: #自动日志记录
       - match: '/'
       - match: 'zoo/cat'
         body:  true
+
+celery_trace: # celery 调用日志记录
+  level: 'DEBUG'
+  client_max_size: 500 # 0 :不记录数据参数
+  server_max_size: 500 # 日志记录 最大数据包长度
+
 
 celery_config:
   services:
@@ -82,12 +88,17 @@ celery_config:
   current: 'test_server' # 当前可用的celery服务
 
 
-
-
-database_config:
-  SQLALCHEMY_DATABASE_URI : 'sqlite:////tmp/test.db'
-  SQLALCHEMY_TRACK_MODIFICATIONS : true
-  SQLALCHEMY_COMMIT_ON_TEARDOWN : true
+#database_config:
+#  databases:
+#    - name: 'default'
+#      uri: 'sqlite:////tmp/test.db'
+#      options:
+#        SQLALCHEMY_TRACK_MODIFICATIONS : true
+#        SQLALCHEMY_COMMIT_ON_TEARDOWN : true
+#
+#  SQLALCHEMY_DATABASE_URI : 'sqlite:////tmp/test.db'
+#  SQLALCHEMY_TRACK_MODIFICATIONS : true
+#  SQLALCHEMY_COMMIT_ON_TEARDOWN : true
 
 http:
   host : '127.0.0.1'
@@ -111,9 +122,11 @@ flask_config:
   active: default
   default:
     REDIS_URL : "redis://:@localhost:6379/1"
-#    SQLALCHEMY_DATABASE_URI : 'mysql://root:root123@127.0.0.1:3306/carrier?charset=utf8'
     SQLALCHEMY_DATABASE_URI : 'sqlite:////tmp/test.db'
-#    SQLALCHEMY_DATABASE_URI : 'sqlite:////tmp/test.db'
+    SQLALCHEMY_BINDS:
+      users:        'mysqldb://localhost/users'
+      appmeta:      'sqlite:////path/to/appmeta.db'
+
     SQLALCHEMY_TRACK_MODIFICATIONS : true
     SQLALCHEMY_COMMIT_ON_TEARDOWN : true
     SECRET_KEY : "abc"
@@ -132,7 +145,54 @@ flask_config:
   devel:
 
 blueprint_routes:
-  - 'access.api.v1'
+  - package: 'access.api.v1'
+    url: '/v1'
+    modules:
+      - name: 'car'
+        url: '/car'
+        routes:
+          - url: '/cat'   # url name
+            name: 'cat'   # function name
+            methods: 'GET,POST'
+          - url: '/online'
+            name: 'lines'
+          - url: '/car'
+            name: 'car'
+
+kafka_config:
+  - topic: 'test'
+    group: 'abcdef'  # simple_consumer if group is null
+#    hosts: '106.14.82.12:9092'
+#    zookeepers: 'wallizard.com:2181'
+    hosts: 'localhost:9092'
+    zookeepers: 'localhost:2181'
+    exec_thread_nr: 1 #执行线程数
+    entry:  'access.kafka.test.get_message' # last unit< get_message> is function object
+    enable: true
+    corutine: false # 是否启用协程
+    access: 'read,write' # 访问模式，用于发送 或接收
+
+amqp_config:
+  - name: 'test'
+    type: 'qpid'
+    host: 'wallizard.com'
+    port: 5672
+    address: "mq_test;{create:always,node:{type:queue,durable:true}}"
+#    address="mq_gwa_broadcast;{create:always,node:{type:topic,durable:true}}"
+    exec_thread_nr: 1 #执行线程数
+    entry:  'access.kafka.test.get_message' # last unit< get_message> is function object
+    enable: true
+
+zookeeper_config:
+  hosts: 'localhost:2181'
+  root: '/camel/carrier'
+
+inspection:
+  health_interval: 20
+
+
+
+# qpid-receive -b localhost:5672 -a "mq_test;{create:always,node:{type:queue,durable:true}}"
 
 
 

@@ -131,7 +131,10 @@ class Logger:
         extra['_lineno'] = lineno
         message = self.message_fmt%extra
 
-        self.logger.log( level ,  message + args[0]%args[1:] )
+        if len(args)>1:
+            self.logger.log( level ,  message + args[0]%args[1:] )
+        else:
+            self.logger.log( level ,  message + args[0] )
 
 
     def debug(self,*args,**kwargs):
@@ -141,6 +144,8 @@ class Logger:
     def warning(self,*args,**kwargs):
         self.log(logging.WARNING, *args, **kwargs)
         return self
+
+    warn=warning
 
     def critical(self,*args,**kwargs):
         self.log(logging.CRITICAL, *args, **kwargs)

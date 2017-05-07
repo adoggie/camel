@@ -7,7 +7,7 @@ from camel.model.log.models import Online
 
 app = Blueprint('zoo',__name__)
 
-@app.route('/car')
+# @app.route('/car')
 def car():
     instance.getLogger().debug('abccc')
     instance.getLogger().addTag('TRANS:A001')
@@ -19,7 +19,7 @@ def do_request():
     instance.getLogger().debug('xxx')
 
 
-@app.route('/cat')
+# @app.route('/cat')
 def cat():
     import time
     time.sleep(.2)
@@ -27,7 +27,7 @@ def cat():
     return 'i am cat!'
 
 
-@app.route('/online')
+# @app.route('/online')
 def lines():
 
     line = Online()

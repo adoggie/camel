@@ -4,6 +4,8 @@ __doc__ = u'celery 服务端功能类'
 
 from celery import Celery,current_app
 from camel.fundamental.utils.importutils import import_module
+from camel.fundamental.utils.useful import get_config_item
+from camel.fundamental.application.app import instance
 
 
 # class CeleryQueue:
@@ -83,12 +85,32 @@ class CeleryService:
             task.open()
         return True
 
+
+    def _log(self,category,name,args):
+        logger = instance.getLogger()
+        root_cfg = instance.getConfig()
+        level = root_cfg.get('level','INFO')
+
+        text = '[Celery] categary:%s name:%s args:%s '%(category,name,args)
+
+
+        text = text.replace('\n','')
+
+        logger.log(level,text)
+
     def send_task(self,name,*args,**kwargs):
         task = self.tasks.get(name)
         if task:
             queue = task.queue
             kwargs['queue'] = queue
             self.app.send_task(name,*args,**kwargs)
+            args = kwargs.get('args',())
+            text = ''
+            if args:
+                text = reduce(lambda x, y: x + ' ,' + y, map(str, args))
+                max_size = get_config_item(instance.getConfig(),'celery_trace.client_max_size',0)
+                text = text[:max_size]
+            self._log('send_task',name,text)
 
 # http://docs.jinkan.org/docs/celery/userguide/routing.html
 

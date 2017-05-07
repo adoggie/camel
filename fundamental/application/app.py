@@ -24,6 +24,7 @@ class Application(Singleton,object):
         self.db = None
         self.config_file ='settings.yaml'
         self.log_filters = {}
+        # self.dbs ={}
 
 
         global instance
@@ -133,7 +134,8 @@ class Application(Singleton,object):
         pass
 
     def getDatabase(self):
-        return self.db
+        pass
+
 
     def _initDatabase(self):
         pass
@@ -214,7 +216,7 @@ class Application(Singleton,object):
 
     def _initCache(self):
         from camel.fundamental.cache.manager import CacheManager
-        self.caches = CacheManager().loads(self.getConfig().get('cache_config'))
+        self.caches = CacheManager.instance().init(self.getConfig().get('cache_config'))
 
     def _initRPC(self):
         pass

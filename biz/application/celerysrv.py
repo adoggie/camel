@@ -20,15 +20,6 @@ class CeleryApplication(AsServer,CamelApplication):
     def __init__(self,*args,**kwargs):
         CamelApplication.__init__(self,*args,**kwargs)
 
-    def _initDatabase(self):
-        self.app = Flask(__name__)
-        cfgs = self.getConfig().get('database_config')
-        for k,v in cfgs.items():
-            self.app.config[k] = v
-
-        if db.get() is None:
-            self.db = SQLAlchemy(self.app)
-            db.handle = self.db
 
     def _initAfter(self):
         global  celery
@@ -46,7 +37,11 @@ class CeleryApplication(AsServer,CamelApplication):
         wkr.run(**options)
 
 
+class CeleryApplicationClient(AsClient,CeleryApplication):
+    def __init__(self):
+        CeleryApplication.__init__(self)
+
 def setup(cls = CeleryApplication):
     return cls.instance()
 
-__all__=(CeleryApplication,AsServer,AsClient,instance,db,celery,setup)
+__all__=(CeleryApplicationClient,CeleryApplication,AsServer,AsClient,instance,db,celery,setup)

@@ -91,20 +91,20 @@
 
 ##Blueprint设置 
 
-在项目代码 src 中 创建 route 目录：
+flask 的blueprint 通过settings.yaml 的blueprints项配置适当的 条目即可
 
-     # route/__init__.py 
-     
-     import car      # 导入route 目录中的blueprint 模块
-    __url__ = '/v1'  # 当前路由的url_prefix
-    __app__ = 'app'  # blueprint 模块中的名称
-    
-    # route/v1/car.py 
-    
-    app = Blueprint('car',__name__)  # 'car' - 为blueprint模块的 url_prefix
-    @app.route('/')
-    def car():
-        return 'okay'
+     blueprint_routes:
+      - package: 'access.api.v1'
+        url: '/v1'
+        modules:
+          - name: 'car'
+            url: '/car'
+            routes:
+              - url: '/cat'   # url name
+                name: 'cat'   # function name
+                methods: 'GET,POST'
+              - url: '/online'
+                name: 'lines'
         
     >>  wget http://127.0.0.1:5000/v1/car/
     >> 'okay'

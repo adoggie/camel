@@ -70,7 +70,7 @@ def get_random_string(length=12,
             hashlib.sha256(
                 ("%s%s%s" % (
                     random.getstate(),
-                    time.time(),
+                    timeutils.timeutils(),
                     settings.SECRET_KEY)).encode('utf-8')
             ).digest())
     return ''.join(random.choice(allowed_chars) for i in range(length))

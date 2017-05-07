@@ -3,13 +3,9 @@
 import sys
 import getopt
 
-from camel.biz.application.celerysrv import CeleryApplication,AsClient,setup,instance,celery
+from camel.biz.application.celerysrv import CeleryApplicationClient,AsClient,setup,instance,celery
 
-class MyService(AsClient,CeleryApplication):
-    def __init__(self):
-        CeleryApplication.__init__(self)
-
-setup(MyService)
+setup(CeleryApplicationClient)
 
 instance.celeryManager.getService('test_server').send_task('access.celery.hello.hello',args=['sss',])
 
