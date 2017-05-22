@@ -18,6 +18,13 @@ class AmqpManager(Singleton):
                 continue
             mq = MQConnectionQpid(cfg)
             self.queues[mq.name] = mq
+            readwrite = 0
+            if cfg.get('write',False):
+                readwrite |= AccessMode.WRITE
+            if cfg.get('read',False):
+                readwrite |= AccessMode.READ
+            mq.open(readwrite)
+
         return self
 
     def getMessageQueue(self,name):

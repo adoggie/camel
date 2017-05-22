@@ -39,26 +39,31 @@ class MQConnectionQpid(object):
 
 
     def open(self,access=AccessMode.READ):
-        broker = "%s:%s" % (self.host, self.port)
-        if self.conn is not None:
+        if access == 0:
             return self
 
-        self.conn = Connection(broker, reconnect=True, tcp_nodelay=True)
-        self.conn.open()
-        self.ssn = self.conn.session()
+        broker = "%s:%s" % (self.host, self.port)
+        # if self.conn is not None:
+        #     return self
+        if not self.conn:
+            self.conn = Connection(broker, reconnect=True, tcp_nodelay=True)
+            self.conn.open()
+            self.ssn = self.conn.session()
 
         if access & AccessMode.READ:
-            self.consumer = self.ssn.receiver(self.address)
-            self.consumer.capacity = 4000
+            if not self.consumer:
+                self.consumer = self.ssn.receiver(self.address)
+                self.consumer.capacity = 4000
 
-            func = import_function(self.entry)  # importing functions dynamically
-            self.func_list[self.entry] = func
+                func = import_function(self.entry)  # importing functions dynamically
+                self.func_list[self.entry] = func
 
-            self.thread = Thread(target=self._messageRecieving)
-            self.thread.start()
+                self.thread = Thread(target=self._messageRecieving)
+                self.thread.start()
 
         if access & AccessMode.WRITE:
-            self.producer = self.ssn.sender(self.address)
+            if not self.producer:
+                self.producer = self.ssn.sender(self.address)
 
         return self
 

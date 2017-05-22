@@ -11,7 +11,7 @@ sqlalchemy-migrate
 flask-whooshalchemy
 flask-wtf
 flask-babel
-virtual-env
+virtualenv
 gevent
 psycopg2
 uwsgi
@@ -22,5 +22,9 @@ requests
 psycogreen
 gevent-psycopg2
 redis
+xpinyin
+python-qpid
+PyYAML
+python-dateutil
 
 #qpid-python-1.36.0.tar.gz

@@ -1,5 +1,7 @@
 #coding:utf-8
 
+from xpinyin import Pinyin
+
 def multi_get_letter(str_input):
   if isinstance(str_input, unicode):
     unicode_str = str_input
@@ -76,6 +78,11 @@ def single_get_first(unicode1):
 def spm(str):
   return ''.join(multi_get_letter(str))
 
+
+def pinyin(str):
+  if not isinstance(str,unicode):
+    return ''
+  return Pinyin().get_pinyin(str).lower()
 
 if __name__ == "__main__":
   str_input=u'欢迎你'

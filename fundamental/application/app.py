@@ -122,7 +122,13 @@ class Application(Singleton,object):
         pass
 
     def _initAfter(self):
-        pass
+        # write pid into file
+        pid = os.getpid()
+        filename = os.path.join(self.getRunPath(),'server.pid')
+        fp = open(filename,'w')
+        fp.write('%s'%pid)
+        fp.close()
+
 
     def _initConfig(self):
         yaml = self.getDefaultConfigFile()
