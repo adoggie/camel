@@ -16,8 +16,10 @@ class CeleryManager(Singleton):
         self.current = None
 
 
-    def init(self,cfg):
-        self.conf = cfg
+    def init(self,cfgs):
+        if not cfgs: return self
+
+        self.conf = cfgs
         # self._initChannels()
         self._initServices()
         name = self.conf.get('current',[])
@@ -25,8 +27,6 @@ class CeleryManager(Singleton):
         svc = self.available_svcs.get(name)
         if svc:
             self.current = svc
-
-            # self.current.open()
         return self
 
     def getService(self,name=''):

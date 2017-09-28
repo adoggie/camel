@@ -7,8 +7,12 @@ import logging
 
 def __FILE__():
     import inspect
-    f = inspect.currentframe().f_back.f_back.f_back
-    return f.f_code.co_filename,f.f_lineno
+    # f = inspect.currentframe().f_back.f_back.f_back
+    f = inspect.currentframe().f_back.f_back
+    stack = inspect.stack()
+    # return f.f_code.co_filename,f.f_lineno
+    return stack[3][1],stack[3][2]
+
 
 class Logger:
     def __init__(self,name):
@@ -104,9 +108,10 @@ class Logger:
         ss = ss.replace(' ', '_')
         return ss
 
+    def log(self, level, *args, **kwargs):
+        self._log(level, *args, **kwargs)
 
-
-    def log(self,level,*args,**kwargs):
+    def _log(self,level,*args,**kwargs):
         """
 
         :param level:
@@ -120,10 +125,12 @@ class Logger:
             level = Logger.convertLevelToIntValue(level)
         extra = self.fmt_extra.copy()
 
-        if kwargs.has_key('tags'):
-            extra['tags'] = self._normalize_tags( kwargs['tags'])
-        else:
-            extra['tags'] = self._normalize_tags('')
+        # if kwargs.has_key('tags'):
+        #     extra['tags'] = self._normalize_tags( kwargs['tags'])
+        # else:
+        #     extra['tags'] = self._normalize_tags('')
+
+        extra['tags'] = ''
 
         filename,lineno = __FILE__()
 
@@ -138,24 +145,24 @@ class Logger:
 
 
     def debug(self,*args,**kwargs):
-        self.log(logging.DEBUG,*args,**kwargs)
+        self._log(logging.DEBUG,*args,**kwargs)
         return self
 
     def warning(self,*args,**kwargs):
-        self.log(logging.WARNING, *args, **kwargs)
+        self._log(logging.WARNING, *args, **kwargs)
         return self
 
     warn=warning
 
     def critical(self,*args,**kwargs):
-        self.log(logging.CRITICAL, *args, **kwargs)
+        self._log(logging.CRITICAL, *args, **kwargs)
         return self
 
     def info(self,*args,**kwargs):
-        self.log(logging.INFO, *args, **kwargs)
+        self._log(logging.INFO, *args, **kwargs)
         return self
 
     def error(self,*args,**kwargs):
-        self.log(logging.ERROR, *args, **kwargs)
+        self._log(logging.ERROR, *args, **kwargs)
         return self
 

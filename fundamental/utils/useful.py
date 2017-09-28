@@ -65,3 +65,20 @@ def get_config_item(root,path,default=None):
     except:
         conf = default
     return conf
+
+
+class ObjectBuilder(object):
+    @staticmethod
+    def create(data):
+        """
+        从 dict 数据生成 object 对象
+        :param data:dict
+        :return:
+        """
+        class _Object:pass
+        if not isinstance(data,dict):
+            return data
+        newobj = _Object()
+        for k,v in data.items():
+            setattr( newobj,str(k),v)
+        return newobj

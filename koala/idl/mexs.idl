@@ -1,0 +1,14 @@
+
+import koala
+
+module koala{
+
+    interface IMessageServer {
+        //发送消息给多目标用户
+        void sendMessage(SIDS_t targets,Message_t message);
+        //确认消息已被接收
+        void acknowledge(SIDS_t seqs);
+    };
+
+}
+

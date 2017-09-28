@@ -1,0 +1,17 @@
+lemon.IBaseServer=100
+lemon.IRedirector=402
+lemon.IServiceEventListener=403
+lemon.ICtrlServer=404
+lemon.ILogServer=405
+lemon.IFileServer=406
+lemon.IUserTeamServer=407
+lemon.IMessageServer=408
+lemon.ITerminalGatewayServer=409
+lemon.ICommunicationServer=410
+lemon.IAuthServer=411
+lemon.ILocationServer=412
+lemon.IUserEventListener=413
+lemon.IUserServer=414
+lemon.ITerminal=201
+lemon.IFileClient=202
+lemon.ITerminalGatewayServerClusterService = 500

@@ -81,10 +81,17 @@ class CeleryService:
             self.app.conf['CELERY_ROUTES'][key] = value
 
     def open(self):
+        import gevent
         for task in self.tasks.values():
             task.open()
+        gevent.spawn(self._asServer())
         return True
 
+    def _asServer(self):
+        from celery.bin import worker
+        wkr = worker.worker(app = self.app)
+        options = {'loglevel': 'INFO', 'traceback': True, }
+        wkr.run(**options)
 
     def _log(self,category,name,args):
         logger = instance.getLogger()

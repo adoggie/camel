@@ -1,9 +1,21 @@
 #coding:utf-8
 
+__author__=u'sam '
+
+"""
+conn_qpid.py
+
+2017/07/07  sam
+  1. 消息接收处理增加异常保护，防止异常抛出导致接收终止
+     消息处理之后进行确认，保证消息不丢失，异常产生重新接收
+
+"""
 
 from threading import Condition
 from threading import Lock
 from threading import Thread
+import traceback
+import gevent
 
 from qpid.messaging import Connection
 from qpid.messaging import Message
@@ -108,23 +120,30 @@ class MQConnectionQpid(object):
             thread.start()
 
         while not self.isclosed:
-            message = self.consumer.fetch()
-            message = message.content
-            self.ssn.acknowledge(sync=False)
-            if message is not None:
-                func = self.func_list[self.entry]
-                func(message)
-
-                # self.lock.acquire()
-                # self.message_pool.append(message)
-                # self.lock.release()
-                # with self.cond_readable:
-                #     # self.cond_readable.notify()
-                #     self.cond_readable.notify_all()
+            try:
+                message = self.consumer.fetch()
+                message = message.content
+                # self.ssn.acknowledge(sync=False)
+                if message is not None:
+                    func = self.func_list[self.entry]
+                    try:
+                        func(message)
+                        self.ssn.acknowledge(sync=False)
+                    except:
+                        instance.getLogger().error(u'amqp::qpid message process error. detail:{}'.format(traceback.format_exc()))
+                    # self.lock.acquire()
+                    # self.message_pool.append(message)
+                    # self.lock.release()
+                    # with self.cond_readable:
+                    #     # self.cond_readable.notify()
+                    #     self.cond_readable.notify_all()
+            except:
+                instance.getLogger().warn(u'amqp::qpid fetch message failed. detail:{}'.format(traceback.format_exc()))
+                gevent.sleep(5)
 
         # for thread in self.execthreads:
         #     thread.join()
-        print 'topic main thread is exiting...'
+        instance.getLogger().info( 'amqp::qpid recieve-thread is exiting...')
 
 
 __all__ = (MQConnectionQpid)

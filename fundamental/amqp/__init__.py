@@ -12,6 +12,8 @@ class AmqpManager(Singleton):
         self.queues = {}
 
     def init(self,cfgs):
+        if not cfgs:
+            return
         self.cfgs = cfgs
         for cfg in self.cfgs:
             if cfg.get('enable',False) is False:

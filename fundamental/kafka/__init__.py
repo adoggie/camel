@@ -42,35 +42,33 @@ class KafkaTopic(object):
 
 
     def open(self,access=READ):
-        if self.conn is not None:
+        if  access == 0:
             return self
-        self.conn = KafkaClient(hosts=self.hosts)
-        self.topic = self.conn.topics[self.name]
 
-        # access = 0
-        # if 'READ' in self.access_cfg:
-        #     access|=READ
-        # if 'WRITE' in self.access_cfg:
-        #     access|=WRITE
+        if not self.conn:
+            self.conn = KafkaClient(hosts=self.hosts)
+            self.topic = self.conn.topics[self.name]
 
         if access & READ:
-            if self.group:
-                self.consumer = self.topic.get_balanced_consumer(consumer_group=self.group,
-                            auto_commit_enable=True,
-                            reset_offset_on_start = True,auto_offset_reset=OffsetType.LATEST,
-                            zookeeper_connect= self.zookeepers
+            if not self.consumer:
+                if self.group:
+                    self.consumer = self.topic.get_balanced_consumer(consumer_group=self.group,
+                                auto_commit_enable=True,
+                                reset_offset_on_start = True,auto_offset_reset=OffsetType.LATEST,
+                                zookeeper_connect= self.zookeepers
+                                )
+                else:
+                    self.consumer = self.topic.get_simple_consumer(auto_commit_enable=True,
+                            reset_offset_on_start = True,auto_offset_reset=OffsetType.LATEST
                             )
-            else:
-                self.consumer = self.topic.get_simple_consumer(auto_commit_enable=True,
-                        reset_offset_on_start = True,auto_offset_reset=OffsetType.LATEST
-                        )
-            func = import_function( self.entry ) # importing functions dynamically
-            self.func_list[self.entry] = func
+                func = import_function( self.entry ) # importing functions dynamically
+                self.func_list[self.entry] = func
 
-            self.thread = Thread(target=self._messageRecieving)
-            self.thread.start()
+                self.thread = Thread(target=self._messageRecieving)
+                self.thread.start()
         if access & WRITE:
-            self.producer = self.topic.get_producer(delivery_reports=False)
+            if not self.producer:
+                self.producer = self.topic.get_producer(delivery_reports=False)
 
         return self
 
@@ -135,12 +133,23 @@ class KafkaManager(Singleton):
         self.topics = {}
 
     def init(self,cfgs):
+        if not cfgs: return
+
         self.cfgs = cfgs
         for cfg in self.cfgs:
             if cfg.get('enable',False) is False:
                 continue
             topic = KafkaTopic(cfg)
             self.topics[topic.name] = topic
+
+            readwrite = 0
+            if cfg.get('write',False):
+                readwrite |= WRITE
+            if cfg.get('read',False):
+                readwrite |= READ
+
+            topic.open(readwrite)
+
         return self
 
     def getTopic(self,name):

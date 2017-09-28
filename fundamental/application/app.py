@@ -24,6 +24,7 @@ class Application(Singleton,object):
         self.db = None
         self.config_file ='settings.yaml'
         self.log_filters = {}
+        self.zk = None
         # self.dbs ={}
 
 
@@ -32,33 +33,53 @@ class Application(Singleton,object):
 
     @property
     def appName(self):
-        if not self.name:
-            return '<APP_NAME>'
-        return self.name
+        app_name = self.getConfig().get('app_name','')
+        return app_name
+
+    @property
+    def appId(self):
+        prj_ver = self.getConfig().get('project_version', '')
+        name = "%s.%s-%s" % (self.projectName, self.name, os.getpid())
+        return name
+
+
+    @property
+    def projectName(self):
+        prj_name = self.getConfig().get('project_name','')
+        return prj_name
 
     def getDefaultConfigFile(self):
         return os.path.join(self.getConfigPath(),self.config_file )
 
     def getHomePath(self):
+        # path = os.getenv('CAMEL_HOME')
+        # if path:
+        #     return os.path.join(path,'products',self.name)
+        path = os.getenv('APP_PATH')
+        if path:
+            return path+'/..'
+        path = os.getcwd() + '/..'
+        return path
+
         # path = os.path.join(self.getCamelHomePath(), 'products', self.name)
         # if not os.path.exists(path):
         #     return os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(self.getCamelHomePath(), 'products', self.name)
+        # return os.path.join(self.getCamelHomePath(), 'products', self.name)
 
     def getConfigPath(self):
-        return os.path.join( self.getCamelHomePath(),'etc',self.name)
+        return os.path.join( self.getHomePath(),'etc')
 
     def getDataPath(self):
-        return os.path.join(self.getCamelHomePath(), 'data', self.name)
+        return os.path.join(self.getHomePath(), 'data')
 
     def getTempPath(self):
-        return os.path.join(self.getCamelHomePath(), 'temp', self.name)
+        return os.path.join(self.getHomePath(), 'temp')
 
     def getLogPath(self):
-        return os.path.join(self.getCamelHomePath(), 'logs', self.name)
+        return os.path.join(self.getHomePath(), 'logs')
 
     def getRunPath(self):
-        return os.path.join(self.getCamelHomePath(), 'run', self.name)
+        return os.path.join(self.getHomePath(), 'run')
 
     def getLogger(self):
         return self.logger
@@ -67,7 +88,12 @@ class Application(Singleton,object):
         path = os.getenv('CAMEL_HOME')
         if path:
             return path
-        return CAMEL_HOME
+
+        return os.path.join(self.getHomePath(),'../')
+        # path = os.getcwd()+'/..'
+        # return path
+        # return os.path.dirname(os.path.abspath(__file__))+'/..'
+        # return CAMEL_HOME
 
 
     def getConfig(self):
@@ -122,7 +148,9 @@ class Application(Singleton,object):
         pass
 
     def _initAfter(self):
-        # write pid into file
+        """ create pid file
+        """
+
         pid = os.getpid()
         filename = os.path.join(self.getRunPath(),'server.pid')
         fp = open(filename,'w')
@@ -134,6 +162,8 @@ class Application(Singleton,object):
         yaml = self.getDefaultConfigFile()
         self.conf = YamlConfigParser(yaml).props
         self._checkConfig()
+        if not self.name:
+            self.name = self.conf.get('app_name','')
 
     def _checkConfig(self):
         """检查配置项是否okay"""
@@ -227,12 +257,29 @@ class Application(Singleton,object):
     def _initRPC(self):
         pass
 
+
     def getCache(self,*args):
-       self.caches.get(*args)
+       return self.caches.get(*args)
 
 
     def run(self):
-        print 'Service [%s] Started..'%self.name
+        forks = self.getConfig().get('forks',0)
+        if forks:
+            pids = []
+            for nr in range(forks):
+                pid = os.fork()
+                if pid == 0: # child process
+                    break
+                else:
+                    pids.append( pid )
+            if pids: #  father process, wait until children all terminated
+                 for pid in pids:
+                    os.waitpid(pid)
+        print 'Service [%s] Started..' % self.name
+        self.serve_forever()
+
+    def serve_forever(self):
+        pass
 
 __all__=(instance,Application)
 

@@ -26,5 +26,7 @@ xpinyin
 python-qpid
 PyYAML
 python-dateutil
+Flask-CAS
+kazoo
 
 #qpid-python-1.36.0.tar.gz

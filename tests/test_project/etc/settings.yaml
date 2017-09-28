@@ -1,6 +1,6 @@
 
-app_name: 'server1'
-project_name: 'carrier'
+app_name: 'testModule'
+project_name: 'testProject'
 project_version: '0.1'
 
 logging:
@@ -147,6 +147,8 @@ flask_config:
 blueprint_routes:
   - package: 'access.api.v1'
     url: '/v1'
+    name: 'v1'
+    register: true
     modules:
       - name: 'car'
         url: '/car'
@@ -182,13 +184,20 @@ amqp_config:
     exec_thread_nr: 1 #执行线程数
     entry:  'access.kafka.test.get_message' # last unit< get_message> is function object
     enable: true
+    read: false
+    write: true
+
 
 zookeeper_config:
   hosts: 'localhost:2181'
-  root: '/camel/carrier'
+  root: '/camel'
 
 inspection:
   health_interval: 20
+
+cas_config:
+  cas_server: 'https://localhost:80'
+  success_login: '/success_login'
 
 
 

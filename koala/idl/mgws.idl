@@ -1,0 +1,12 @@
+
+import koala
+
+module koala{
+
+    //终端网关服务
+    interface ITerminalGatewayServer {
+        void ping();    //心跳检测
+    };
+
+}
+

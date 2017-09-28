@@ -1,0 +1,64 @@
+
+
+module koala{
+
+    sequence<string>            SIDS_t;
+    dictionary<string,string>   Properties_t;
+
+
+    //错误信息
+    struct Error_t{
+        bool 	succ;		//成功标志
+        int 	code;		//错误码
+        string  msg;		//错误信息描述
+    };
+
+
+    //通用返回信息
+    struct CallReturn_t{
+        Error_t error;		//错误信息
+        string value;		//返回值
+        string delta;		//额外参数
+    };
+
+
+    //用户认证信息, AuthResult信息将被编码成Token并传递到前端
+    struct AuthToken_t{
+        string 	user_id;			//用户编号
+        string 	user_name;			//用户名称
+        long    login_time;			//登陆时间
+        long    expire_time;		//会话过期时间
+        int    	platform_type;			//android,ios,desktop
+        string 	device_id;			//设备编号,用于设备登陆到tgs时，tgs判断登陆设备与token是否一致
+    };
+
+
+    struct MessageMeta_t{
+        string realm;  //
+        string seq;     //序号
+        string sender;  //
+        string stime;   //发送时间
+    };
+
+    struct Message_t{
+        MessageMeta_t meta;
+        string title;
+        string content;
+        Properties_t props;
+    };
+
+    // ITerminal 终端接口
+    interface ITerminal{
+        void onMessage(Message_t message);
+        void onError(string errcode,string errmsg);
+    };
+
+    interface IUserEventListener{
+        void onUserOnline(string user_id,string gws_id,int device);          //用户上线 device - 登陆设备类型 0 - unknown, 1 - mobile , 2 - desktop
+        void onUserOffline(string user_id,string gws_id,int device);         //用户离线
+    };
+
+
+
+}
+

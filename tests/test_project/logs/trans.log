@@ -11,3 +11,5 @@ DEBUG 2017-04-05 10:14:29,508  carrier:0.1 <APP_NAME> car.py:19 [TRANS:A001] xxx
 DEBUG 2017-04-05 10:14:29,511  carrier:0.1 <APP_NAME> server.py:30 [TRANS:A001] HttpResponse (elapsed time:11ms) : {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": "i am car!"}
 DEBUG 2017-04-06 20:56:29,606  carrier:0.1 <APP_NAME> car.py:19 [TRANS:A001] xxx
 DEBUG 2017-04-06 20:56:29,609  carrier:0.1 <APP_NAME> server.py:30 [TRANS:A001] HttpResponse (elapsed time:47ms) : {"url": "http://127.0.0.1:5555/v1/zoo/car", "body": "i am car!"}
+DEBUG 2017-04-11 22:30:52,662  carrier:0.1 <APP_NAME> car.py:19 [TRANS:A001] xxx
+DEBUG 2017-04-11 22:30:52,663  carrier:0.1 <APP_NAME> server.py:30 [TRANS:A001] HttpResponse (elapsed time:3ms) : {"url": "http://localhost:5555/v1/car/car", "body": "i am car!"}

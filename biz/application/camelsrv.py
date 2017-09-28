@@ -1,21 +1,17 @@
 #coding:utf-8
 
-from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask_cors import CORS, cross_origin
-
+import use_gevent
+from use_gevent import Event
 from camel.fundamental.utils.useful import Instance
 from camel.fundamental.application import Application,instance
 
-db = Instance()
 
 class CamelApplication(Application):
     def __init__(self,*args,**kwargs):
         Application.__init__(self,*args,**kwargs)
-        self.flask_app = None
+        self.wait_ev = Event()
         self.init()
         self._initSignal()
-        self._initFlaskApp()
 
     def _initSignal(self):
         """多线程时, signal 被发送到创建的子线程中，主线程无法捕获"""
@@ -26,47 +22,69 @@ class CamelApplication(Application):
         print 'signal ctrl-c'
         self._terminate()
 
-    def _terminate(self):
-        pass
-
     def _initDatabase(self):
         pass
 
-    def _initFlaskApp(self):
-        self.app = Flask(__name__)
-        self._initFlaskConfig()
-        self._initFlaskCors()
+    def run(self):
+        print 'Camel Server starting..'
+        Application.run(self)
 
-        # global db
-        if db.get() is None:
-            self.db = SQLAlchemy(self.app)
-            db.handle = self.db
+    def serve_forever(self):
+        while not self.wait_ev.is_set():
+            self.wait_ev.wait(1)
 
-    def getDatabase(self):
-        return self.db
+    def _terminate(self):
+        self.wait_ev.set()
 
-    def getFlaskConfig(self):
-        cfg = self.getConfig().get('flask_config')
-        return cfg.get( cfg.get('active') )
+    def _setupZk(self):
+        from camel.fundamental.zookeeper.client import ZKClient
+        cfg = self.getConfig().get('zookeeper_config')
+        if cfg:
+            self.zk = ZKClient(cfg)
+            self.zk.open()
+
+    def getZookeeper(self):
+        return self.zk
+
+    def _setupCelery(self):
+        from camel.fundamental.celery.manager import CeleryManager
+        CeleryManager.instance().init(self.getConfig().get('celery_config', {}))
+        if CeleryManager.instance().current:
+            CeleryManager.instance().current.open()
+
+    def _setupKafka(self):
+        from camel.fundamental.kafka import KafkaManager
+        KafkaManager.instance().init(self.getConfig().get('kafka_config'))
 
 
-    def _initFlaskConfig(self):
-        """初始化激活的配置"""
-        active = self.getFlaskConfig()
-        for k, v in active.items():
-            self.app.config[k] = v
+    def _setupAmqp(self):
+        from camel.fundamental.amqp import AmqpManager
+        AmqpManager.instance().init(self.getConfig().get('amqp_config'))
 
-    def _initFlaskCors(self):
-        """
-            https://flask-cors.readthedocs.io/en/latest/
-        :return:
-        """
-        CORS(self.app)
+    def _setupServiceManager(self):
+        # 服务管理器
+        from srvmgr import ServiceManager, ServiceRegEndpointZookeeper
+        ServiceManager.instance()
+        workdir = "%s/%s" % (self.projectName, self.appName)
+        if self.zk:
+            sre = ServiceRegEndpointZookeeper(self.zk, workdir)
+            ServiceManager.instance().addEndpoint(sre)
 
-    def getFlaskApp(self):
-        return self.app
+        cfgs = self.getConfig().get('watchtask_config',[])
+        for cfg in cfgs:
+            ServiceManager.instance().addWatchTask(cfg)
+        ServiceManager.instance().startWatch()
+
+    def _initAfter(self):
+        super(CamelApplication,self)._initAfter()
+        self._setupCelery()
+        self._setupAmqp()
+        self._setupKafka()
+        self._setupZk()
+        self._setupServiceManager()
+
 
 def setup(cls = CamelApplication):
     return cls.instance()
 
-__all__=(CamelApplication,instance,db)
+__all__=(CamelApplication,instance)

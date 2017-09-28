@@ -5,3 +5,9 @@
 .class
 .log
 
+
+tests/test_project/logs/server.log
+
+tests/test_project/logs/server.log
+
+tests/test_project/logs/trans.log

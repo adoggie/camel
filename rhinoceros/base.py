@@ -15,7 +15,22 @@ class ProviderType(TypeBase):
     ZJXL    = ValueEntry(2,u'中交兴路')
     YL      = ValueEntry(3,u'易流')
     ZQ      = ValueEntry(4,u'重汽')
+    BD      = ValueEntry(5,u'运盟司机App接入百度鹰眼数据')
+    KMS     = ValueEntry(6,u'康明斯')
+    XR      = ValueEntry(7,u'杭州星软')
+    JF      = ValueEntry(8,u'杭州及方')
+    HB      = ValueEntry(9,u'深圳华宝')
+    KL      = ValueEntry(10,u'上海控络')
 
+
+"""
+|KMS|6|int|康明斯|
+|XR|7|int|杭州星软|
+|JF|8|int|杭州及方|
+|HB|9|int|深圳华宝|
+|KL|10|int|上海控络|
+
+"""
 # class PayloadType(TypeBase):
 #     LOC     = ValueEntry(0x01,u'位置信息')
 #     EMS     = ValueEntry(0x02,u'发送机数据')
